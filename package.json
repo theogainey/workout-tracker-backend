@@ -7,13 +7,19 @@
   },
   "main": "main.js",
   "scripts": {
-    "build": "esbuild src/index.ts --outfile=main.js --bundle --platform=node --packages=external --target=node16.0 --loader:.ts=ts",
+    "build:ts": "esbuild src/index.ts --outfile=main.js --bundle --platform=node --packages=external --target=node16.0 --loader:.ts=ts",
+    "build:prisma": "npm i && npx prisma generate",
+    "build" : "run-p build:prisma build:ts",
     "dev": "nodemon --watch src --ext ts --exec run-s build start",
     "start": "node main.js"
   },
   "dependencies": {
+    "@graphql-yoga/node": "^3.9.1",
+    "@pothos/core": "^3.30.0",
+    "@pothos/plugin-prisma": "^3.52.0",
     "@prisma/client": "^4.15.0",
-    "express": "^4.18.2"
+    "graphql": "^16.6.0",
+    "graphql-scalars": "^1.22.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",

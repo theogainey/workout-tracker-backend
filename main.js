@@ -23,9 +23,85 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 
 // src/index.ts
-var import_express = __toESM(require("express"));
-var app = (0, import_express.default)();
-app.get("/", function(req, res) {
-  res.send("Hello World");
+var import_graphql_yoga = require("graphql-yoga");
+var import_http = require("http");
+
+// src/builder.ts
+var import_core = __toESM(require("@pothos/core"));
+var import_graphql_scalars = require("graphql-scalars");
+var import_plugin_prisma = __toESM(require("@pothos/plugin-prisma"));
+
+// src/db.ts
+var import_client = require("@prisma/client");
+var prisma = new import_client.PrismaClient();
+
+// src/builder.ts
+var builder = new import_core.default({
+  plugins: [import_plugin_prisma.default],
+  prisma: {
+    client: prisma
+  }
 });
-app.listen(3e3);
+builder.addScalarType("Date", import_graphql_scalars.DateResolver, {});
+builder.queryType({});
+
+// src/models/WorkOut.ts
+builder.prismaObject("WorkOut", {
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    createdAt: t.expose("createdAt", {
+      type: "Date"
+    }),
+    exercises: t.relation("exercises")
+  })
+});
+builder.queryField(
+  "workouts",
+  (t) => t.prismaField({
+    type: ["WorkOut"],
+    resolve: async (query, root, args, ctx, info) => {
+      return prisma.workOut.findMany({ ...query });
+    }
+  })
+);
+
+// src/models/Exercise.ts
+builder.prismaObject("Exercise", {
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    name: t.exposeString("name"),
+    sets: t.relation("sets")
+  })
+});
+
+// src/models/Set.ts
+builder.prismaObject("Set", {
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    duration: t.expose("duration", {
+      type: "Int",
+      nullable: true
+    }),
+    weight: t.expose("weight", {
+      type: "Int",
+      nullable: true
+    }),
+    repetitions: t.expose("repetitions", {
+      type: "Int",
+      nullable: true
+    })
+  })
+});
+
+// src/schema.ts
+var schema = builder.toSchema({});
+
+// src/index.ts
+function main() {
+  const yoga = (0, import_graphql_yoga.createYoga)({ schema });
+  const server = (0, import_http.createServer)(yoga);
+  server.listen(3e3, () => {
+    console.info("Server is running on http://localhost:3000/graphql");
+  });
+}
+main();
