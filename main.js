@@ -59,8 +59,12 @@ builder.queryField(
   "workouts",
   (t) => t.prismaField({
     type: ["WorkOut"],
+    args: {
+      id: t.arg.int()
+    },
     resolve: async (query, root, args, ctx, info) => {
-      return prisma.workOut.findMany({ ...query });
+      const { id } = args;
+      return id ? prisma.workOut.findMany({ where: { id }, ...query }) : prisma.workOut.findMany({ ...query });
     }
   })
 );
@@ -73,6 +77,19 @@ builder.prismaObject("Exercise", {
     sets: t.relation("sets")
   })
 });
+builder.queryField(
+  "exercise",
+  (t) => t.prismaField({
+    type: ["Exercise"],
+    args: {
+      id: t.arg.int()
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const id = args.id;
+      return prisma.exercise.findMany({ where: { id }, ...query });
+    }
+  })
+);
 
 // src/models/Set.ts
 builder.prismaObject("Set", {

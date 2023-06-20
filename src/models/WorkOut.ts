@@ -14,8 +14,14 @@ builder.prismaObject("WorkOut", {
 builder.queryField("workouts", (t) =>
   t.prismaField({
     type: ["WorkOut"],
+    args: {
+      id: t.arg.int(),
+    },
     resolve: async (query, root, args, ctx, info) => {
-      return prisma.workOut.findMany({ ...query });
+      const { id } = args
+      return id 
+      ? prisma.workOut.findMany({ where: { id }, ...query })
+      : prisma.workOut.findMany({ ...query });
     },
   })
 );
