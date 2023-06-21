@@ -15,7 +15,7 @@ builder.queryField("workouts", (t) =>
   t.prismaField({
     type: ["WorkOut"],
     args: {
-      id: t.arg.int(),
+      id: t.arg.int({required: false}),
     },
     resolve: async (query, root, args, ctx, info) => {
       const { id } = args
@@ -26,3 +26,11 @@ builder.queryField("workouts", (t) =>
   })
 );
 
+builder.mutationField("createWorkout", (t) =>
+  t.prismaField({
+    type: "WorkOut",
+    resolve: async (query, root, args, ctx, info) => {
+      return prisma.workOut.create({ data: {} });
+    },
+  })
+);

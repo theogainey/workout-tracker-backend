@@ -44,6 +44,7 @@ var builder = new import_core.default({
 });
 builder.addScalarType("Date", import_graphql_scalars.DateResolver, {});
 builder.queryType({});
+builder.mutationType({});
 
 // src/models/WorkOut.ts
 builder.prismaObject("WorkOut", {
@@ -65,6 +66,15 @@ builder.queryField(
     resolve: async (query, root, args, ctx, info) => {
       const { id } = args;
       return id ? prisma.workOut.findMany({ where: { id }, ...query }) : prisma.workOut.findMany({ ...query });
+    }
+  })
+);
+builder.mutationField(
+  "createWorkout",
+  (t) => t.prismaField({
+    type: "WorkOut",
+    resolve: async (query, root, args, ctx, info) => {
+      return prisma.workOut.create({ data: {} });
     }
   })
 );
