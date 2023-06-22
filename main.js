@@ -26,6 +26,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var import_graphql_yoga = require("graphql-yoga");
 var import_http = require("http");
 
+// src/schema.ts
+var import_fs = require("fs");
+
 // src/builder.ts
 var import_core = __toESM(require("@pothos/core"));
 var import_graphql_scalars = require("graphql-scalars");
@@ -46,6 +49,9 @@ builder.addScalarType("Date", import_graphql_scalars.DateResolver, {});
 builder.queryType({});
 builder.mutationType({});
 
+// src/schema.ts
+var import_graphql = require("graphql");
+
 // src/models/WorkOut.ts
 builder.prismaObject("WorkOut", {
   fields: (t) => ({
@@ -61,7 +67,7 @@ builder.queryField(
   (t) => t.prismaField({
     type: ["WorkOut"],
     args: {
-      id: t.arg.int()
+      id: t.arg.int({ required: false })
     },
     resolve: async (query, root, args, ctx, info) => {
       const { id } = args;
@@ -100,6 +106,28 @@ builder.queryField(
     }
   })
 );
+builder.mutationField(
+  "addExercise",
+  (t) => t.prismaField({
+    type: "Exercise",
+    args: {
+      workoutId: t.arg.int({ required: true }),
+      name: t.arg.string({ required: true })
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const { workoutId, name } = args;
+      if (!workoutId || !name) {
+        throw new Error("both workoutID and exercise name are required");
+      }
+      return prisma.exercise.create({
+        data: {
+          workOutId: workoutId,
+          name
+        }
+      });
+    }
+  })
+);
 
 // src/models/Set.ts
 builder.prismaObject("Set", {
@@ -122,6 +150,8 @@ builder.prismaObject("Set", {
 
 // src/schema.ts
 var schema = builder.toSchema({});
+var schemaAsString = (0, import_graphql.printSchema)((0, import_graphql.lexicographicSortSchema)(schema));
+(0, import_fs.writeFileSync)("./src/schema.graphql", schemaAsString);
 
 // src/index.ts
 function main() {
