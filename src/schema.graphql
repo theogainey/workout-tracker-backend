@@ -11,11 +11,13 @@ type Exercise {
 
 type Mutation {
   addExercise(name: String!, workoutId: Int!): Exercise!
+  addSet(duration: Int, exerciseId: Int!, repetitions: Int, weight: Int): Set!
   createWorkout: WorkOut!
 }
 
 type Query {
   exercise(id: Int): [Exercise!]!
+  set(id: Int): [Set!]!
   workouts(id: Int): [WorkOut!]!
 }
 
